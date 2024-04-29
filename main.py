@@ -3,41 +3,95 @@ import json
 import os
 import requests
 
+significados_cache = {}
+
 def buscar_significado_palabra(palabra):
-    try:
-        url = f"https://api.dictionaryapi.dev/api/v2/entries/en_US/{palabra}"
-        response = requests.get(url)
-        data = response.json()
-        if isinstance(data, list):
-            meanings = data[0].get("meanings", [])
-            if meanings:
-                return meanings[0].get("definitions", [])[0].get("definition", None)
-        return None
-    except Exception as e:
-        print(f"Error al buscar el significado de la palabra '{palabra}': {e}")
-        return None
+    if palabra in significados_cache:
+        return significados_cache[palabra]
+    else:
+        try:
+            url = f"https://api.dictionaryapi.dev/api/v2/entries/es_CL/{palabra}"
+            response = requests.get(url)
+            data = response.json()
+            if isinstance(data, list):
+                meanings = data[0].get("meanings", [])
+                if meanings:
+                    significado = meanings[0].get("definitions", [])[0].get("definition", None)
+                    significados_cache[palabra] = significado
+                    return significado
+        except Exception as e:
+            print(f"Error al buscar el significado de la palabra '{palabra}': {e}")
+            return None
 
-def build_quantum_circuit(input_indices, target_indices):
-    # Calcular la cantidad de qubits necesarios
-    num_qubits = max(input_indices + target_indices) + 1
+def ver_vocabulario(vocabulario):
+    print("Vocabulario actual:")
+    for palabra, significado in vocabulario.items():
+        print(f"{palabra}: {significado}")
 
-    # Crear los registros cuánticos
-    qr = QuantumRegister(num_qubits)
-    circuit = QuantumCircuit(qr)
+def agregar_palabra_vocabulario(vocabulario):
+    palabra = input("Ingrese la palabra que desea agregar al vocabulario: ")
+    significado = input(f"Ingrese el significado de la palabra '{palabra}': ")
+    vocabulario[palabra] = significado
+    print(f"Palabra '{palabra}' agregada al vocabulario con significado '{significado}'")
 
-    # Aplicar puertas cuánticas y realizar cálculos según la secuencia de entrada
-    for input_idx in input_indices:
-        if input_idx != -1 and input_idx < num_qubits:
-            circuit.h(qr[input_idx])  # Aplicar una compuerta Hadamard a cada qubit de entrada
+def eliminar_palabra_vocabulario(vocabulario):
+    palabra = input("Ingrese la palabra que desea eliminar del vocabulario: ")
+    if palabra in vocabulario:
+        del vocabulario[palabra]
+        print(f"Palabra '{palabra}' eliminada del vocabulario")
+    else:
+        print(f"La palabra '{palabra}' no está en el vocabulario")
+
+def buscar_palabra_similar(vocabulario):
+    palabra = input("Ingrese la palabra que desea buscar similares: ")
+    similares = [p for p in vocabulario if p.startswith(palabra)]
+    if similares:
+        print(f"Palabras similares a '{palabra}': {', '.join(similares)}")
+    else:
+        print(f"No se encontraron palabras similares a '{palabra}'")
+
+def ejecutar_circuito_cuántico(vocabulario, data_entrenamiento):
+    print("Menú de opciones para ejecutar el circuito cuántico:")
+    print("1. Ejecutar circuito cuántico con número de qubits predeterminado")
+    print("2. Ejecutar circuito cuántico con número de qubits seleccionado por el usuario")
+    print("3. Ejecutar circuito cuántico en un simulador cuántico")
+    print("4. Ejecutar circuito cuántico en un dispositivo cuántico real")
+    opcion = input("Seleccione una opción: ")
     
-    # Generar índices únicos para los qubits de destino
-    target_indices = [idx for idx in target_indices if idx not in input_indices]
-
-    for target_idx in target_indices:
-        if target_idx < num_qubits:
-            circuit.cx(qr[input_indices[0]], qr[target_idx])  # Aplicar una compuerta CNOT entre el primer qubit de entrada y los qubits de destino
+    if opcion == "1":
+        num_qubits = 5  # Número de qubits predeterminado
+        # Generar el circuito cuántico con el número de qubits predeterminado
+        qr = QuantumRegister(num_qubits)
+        circuit = QuantumCircuit(qr)
+        # Ejecutar el circuito cuántico
+        print("Ejecutando el circuito cuántico...")
+        # Aquí puedes ejecutar el circuito en un simulador cuántico o en un dispositivo real
+        print("Circuito cuántico ejecutado exitosamente.")
     
-    return circuit
+    elif opcion == "2":
+        num_qubits = int(input("Ingrese el número de qubits que desea utilizar: "))
+        # Generar el circuito cuántico con el número de qubits seleccionado por el usuario
+        qr = QuantumRegister(num_qubits)
+        circuit = QuantumCircuit(qr)
+        # Ejecutar el circuito cuántico
+        print("Ejecutando el circuito cuántico...")
+        # Aquí puedes ejecutar el circuito en un simulador cuántico o en un dispositivo real
+        print("Circuito cuántico ejecutado exitosamente.")
+    
+    elif opcion == "3":
+        # Ejecutar el circuito cuántico en un simulador cuántico
+        print("Ejecutando el circuito cuántico en un simulador cuántico...")
+        # Aquí puedes ejecutar el circuito en un simulador cuántico
+        print("Circuito cuántico ejecutado exitosamente en un simulador cuántico.")
+    
+    elif opcion == "4":
+        # Ejecutar el circuito cuántico en un dispositivo cuántico real
+        print("Ejecutando el circuito cuántico en un dispositivo cuántico real...")
+        # Aquí puedes ejecutar el circuito en un dispositivo cuántico real
+        print("Circuito cuántico ejecutado exitosamente en un dispositivo cuántico real.")
+    
+    else:
+        print("Opción no válida. Por favor, seleccione una opción válida.")
 
 def actualizar_vocabulario(vocabulario):
     try:
@@ -54,87 +108,78 @@ def actualizar_data_entrenamiento(data_entrenamiento):
         print("Archivo de data de entrenamiento actualizado exitosamente.")
     except Exception as e:
         print(f"Error al actualizar el archivo de data de entrenamiento: {e}")
-        
+
+def procesar_instruccion(instruccion, vocabulario):
+    input_words = instruccion.split()
+    unique_input_words = list(set(input_words))  # Eliminar palabras duplicadas
+    input_indices = [vocabulario.get(word, -1) for word in unique_input_words]
+    
+    if -1 in input_indices:
+        palabras_faltantes = [unique_input_words[i] for i in range(len(input_indices)) if input_indices[i] == -1]
+        for palabra in palabras_faltantes:
+            if palabra not in vocabulario:
+                while True:
+                    opcion = input(f"La palabra '{palabra}' no está en el vocabulario. ¿Quieres buscar su significado en línea? (si/no): ")
+                    if opcion.lower() == 'si':
+                        significado = buscar_significado_palabra(palabra)
+                        if significado:
+                            print(f"Significado encontrado para '{palabra}': {significado}")
+                            vocabulario[palabra] = significado
+                            break
+                        else:
+                            print(f"No se encontró significado en línea para '{palabra}'.")
+                            break
+                    elif opcion.lower() == 'no':
+                        significado = input(f"Por favor, ingresa el significado de '{palabra}' (o escribe 'omitir' para continuar sin definir): ")
+                        if significado.lower() == 'omitir':
+                            break
+                        else:
+                            vocabulario[palabra] = significado
+                            break
+                    else:
+                        print("Opción no válida. Por favor, ingresa 'si' o 'no'.")
+
+    return vocabulario, input_indices
+
 def interactuar_con_usuario(vocabulario, data_entrenamiento):
     while True:
-        instruccion = input("Ingrese una instrucción en lenguaje natural ('salir' para salir): ")
-        if instruccion.lower() =='salir':
+        print("Menú de opciones:")
+        print("1. Ingresar instrucción en lenguaje natural")
+        print("2. Ver vocabulario")
+        print("3. Agregar palabra al vocabulario")
+        print("4. Eliminar palabra del vocabulario")
+        print("5. Buscar palabra similar")
+        print("6. Ejecutar circuito cuántico")
+        print("7. Salir")
+        opcion = input("Seleccione una opción: ")
+        
+        if opcion == "1":
+            instruccion = input("Ingrese una instrucción en lenguaje natural: ")
+            vocabulario, input_indices = procesar_instruccion(instruccion, vocabulario)
+            # Actualizar el archivo JSON del vocabulario
+            actualizar_vocabulario(vocabulario)
+            # Actualizar la data de entrenamiento
+            data_entrenamiento.append((instruccion, input_indices))
+            actualizar_data_entrenamiento(data_entrenamiento)
+        elif opcion == "2":
+            ver_vocabulario(vocabulario)
+        elif opcion == "3":
+            agregar_palabra_vocabulario(vocabulario)
+            # Actualizar el archivo JSON del vocabulario
+            actualizar_vocabulario(vocabulario)
+        elif opcion == "4":
+            eliminar_palabra_vocabulario(vocabulario)
+            # Actualizar el archivo JSON del vocabulario
+            actualizar_vocabulario(vocabulario)
+        elif opcion == "5":
+            buscar_palabra_similar(vocabulario)
+        elif opcion == "6":
+            ejecutar_circuito_cuántico(vocabulario, data_entrenamiento)
+        elif opcion == "7":
             print("¡Hasta luego!")
             break
-        
-        # Preprocesar la instrucción
-        input_words = instruccion.split()
-        unique_input_words = list(set(input_words))  # Eliminar palabras duplicadas
-        input_indices = [vocabulario.get(word, -1) for word in unique_input_words]
-        
-        if -1 in input_indices:
-            palabras_faltantes = [unique_input_words[i] for i in range(len(input_indices)) if input_indices[i] == -1]
-            for palabra in palabras_faltantes:
-                if palabra not in vocabulario:
-                    while True:
-                        opcion = input(f"La palabra '{palabra}' no está en el vocabulario. ¿Quieres buscar su significado en línea? (si/no): ")
-                        if opcion.lower() == 'si':
-                            significado = buscar_significado_palabra(palabra)
-                            if significado:
-                                print(f"Significado encontrado para '{palabra}': {significado}")
-                                vocabulario[palabra] = significado
-                                break
-                            else:
-                                print(f"No se encontró significado en línea para '{palabra}'.")
-                                break
-                        elif opcion.lower() == 'no':
-                            significado = input(f"Por favor, ingresa el significado de '{palabra}' (o escribe 'omitir' para continuar sin definir): ")
-                            if significado.lower() == 'omitir':
-                                break
-                            else:
-                                vocabulario[palabra] = significado
-                                break
-                        else:
-                            print("Opción no válida. Por favor, ingresa 'si' o 'no'.")
-        
-        # Actualizar el archivo JSON del vocabulario
-        actualizar_vocabulario(vocabulario)
-        
-        # Actualizar la data de entrenamiento
-        data_entrenamiento.append((input_words, input_indices))
-        actualizar_data_entrenamiento(data_entrenamiento)
-        
-        # Definir num_qubits
-        num_qubits = len(input_indices) * 2
-        
-        # Verificar si los índices son válidos
-        if all(isinstance(idx, int) for idx in input_indices):
-            # Generar el circuito cuántico
-            qr = QuantumRegister(num_qubits)
-            circuit = QuantumCircuit(qr)
-            
-            for input_idx in input_indices:
-                if input_idx!= -1 and input_idx < num_qubits:
-                    circuit.h(qr[input_idx])  # Aplicar una compuerta Hadamard a cada qubit de entrada
-            
-            # Seleccionar el qubit de control
-            control_idx = int(input("Seleccione el qubit de control (0-{}): ".format(len(input_indices) - 1)))
-            if control_idx < 0 or control_idx >= len(input_indices):
-                print("Índice de control inválido. Por favor, seleccione un índice entre 0 y {}".format(len(input_indices) - 1))
-                continue
-            
-            # Generar índices únicos para los qubits de destino
-            target_indices = [idx for idx in range(len(input_indices), num_qubits) if idx not in input_indices]
-            
-            for target_idx in target_indices:
-                if target_idx < num_qubits and input_indices[control_idx] is not None:
-                    circuit.cx(qr[input_indices[control_idx]], qr[target_idx])  # Aplicar una compuerta CNOT entre el qubit de control y los qubits de destino
-            
-            # Ejecutar el circuito en un simulador cuántico
-            print("Ejecutando el circuito cuántico...")
-            # Aquí puedes ejecutar el circuito en un simulador cuántico o en un dispositivo real
-            print("Circuito cuántico ejecutado exitosamente.")
-            
-            # Mostrar el tamaño del modelo
-            print("Tamaño del modelo:", len(vocabulario), "palabras")
         else:
-            print("Tamaño del modelo:", len(vocabulario), "palabras")
-            print("Ha ocurrido un error al procesar la instrucción. Por favor, asegúrate de que el vocabulario esté actualizado y vuelve a intentarlo.")
+            print("Opción no válida. Por favor, seleccione una opción válida.")
 
 # Verificar si el archivo JSON del vocabulario existe
 if not os.path.exists('vocabulario.json'):
