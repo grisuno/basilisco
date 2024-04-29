@@ -2,8 +2,55 @@ from qiskit import QuantumRegister, QuantumCircuit
 import json
 import os
 import requests
+from gensim.models import Word2Vec
 
 significados_cache = {}
+
+class Vocabulario:
+    def __init__(self, data):
+        self.vocabulario = data
+
+    def cargar_vocabulario(self):
+        try:
+            with open(self.archivo_vocabulario, 'r') as vocab_file:
+                return json.load(vocab_file)
+        except Exception as e:
+            print(f"Error al cargar el archivo de vocabulario: {e}")
+            return {}
+
+    def agregar_palabra(self, palabra, significado):
+        self.vocabulario[palabra] = significado
+        self.guardar_vocabulario()
+
+    def eliminar_palabra(self, palabra):
+        if palabra in self.vocabulario:
+            del self.vocabulario[palabra]
+            self.guardar_vocabulario()
+
+    def guardar_vocabulario(self):
+        try:
+            with open('vocabulario.json', 'w') as vocab_file:
+                json.dump(self.vocabulario, vocab_file)
+        except Exception as e:
+            print(f"Error al guardar el archivo de vocabulario: {e}")
+
+    def transformar_a_modelo(self):
+        palabras = list(self.vocabulario.keys())
+        modelo = Word2Vec(sentences=[palabras], vector_size=100, window=5, min_count=1, workers=4)
+        return modelo
+
+class Modelo:
+    def __init__(self, vocabulario):
+        self.vocabulario = vocabulario
+        self.modelo = None
+
+    def transformar_vocabulario_a_modelo(self):
+        palabras = list(self.vocabulario.vocabulario.keys())
+        self.modelo = Word2Vec(sentences=[palabras], vector_size=100, window=5, min_count=1, workers=4)
+
+    def entrenar_modelo(self, data_entrenamiento):
+        if self.modelo is None:
+            self.transformar_vocabulario_a_modelo()
 
 def buscar_significado_palabra(palabra):
     if palabra in significados_cache:
@@ -31,20 +78,15 @@ def ver_vocabulario(vocabulario):
 def agregar_palabra_vocabulario(vocabulario):
     palabra = input("Ingrese la palabra que desea agregar al vocabulario: ")
     significado = input(f"Ingrese el significado de la palabra '{palabra}': ")
-    vocabulario[palabra] = significado
-    print(f"Palabra '{palabra}' agregada al vocabulario con significado '{significado}'")
+    vocabulario.agregar_palabra(palabra, significado)
 
 def eliminar_palabra_vocabulario(vocabulario):
     palabra = input("Ingrese la palabra que desea eliminar del vocabulario: ")
-    if palabra in vocabulario:
-        del vocabulario[palabra]
-        print(f"Palabra '{palabra}' eliminada del vocabulario")
-    else:
-        print(f"La palabra '{palabra}' no está en el vocabulario")
+    vocabulario.eliminar_palabra(palabra)
 
 def buscar_palabra_similar(vocabulario):
     palabra = input("Ingrese la palabra que desea buscar similares: ")
-    similares = [p for p in vocabulario if p.startswith(palabra)]
+    similares = [p for p in vocabulario.vocabulario if p.startswith(palabra)]
     if similares:
         print(f"Palabras similares a '{palabra}': {', '.join(similares)}")
     else:
@@ -59,72 +101,51 @@ def ejecutar_circuito_cuántico(vocabulario, data_entrenamiento):
     opcion = input("Seleccione una opción: ")
     
     if opcion == "1":
-        num_qubits = 5  # Número de qubits predeterminado
-        # Generar el circuito cuántico con el número de qubits predeterminado
+        num_qubits = 5
         qr = QuantumRegister(num_qubits)
         circuit = QuantumCircuit(qr)
-        # Ejecutar el circuito cuántico
         print("Ejecutando el circuito cuántico...")
-        # Aquí puedes ejecutar el circuito en un simulador cuántico o en un dispositivo real
         print("Circuito cuántico ejecutado exitosamente.")
     
     elif opcion == "2":
         num_qubits = int(input("Ingrese el número de qubits que desea utilizar: "))
-        # Generar el circuito cuántico con el número de qubits seleccionado por el usuario
         qr = QuantumRegister(num_qubits)
         circuit = QuantumCircuit(qr)
-        # Ejecutar el circuito cuántico
         print("Ejecutando el circuito cuántico...")
-        # Aquí puedes ejecutar el circuito en un simulador cuántico o en un dispositivo real
         print("Circuito cuántico ejecutado exitosamente.")
     
     elif opcion == "3":
-        # Ejecutar el circuito cuántico en un simulador cuántico
         print("Ejecutando el circuito cuántico en un simulador cuántico...")
-        # Aquí puedes ejecutar el circuito en un simulador cuántico
         print("Circuito cuántico ejecutado exitosamente en un simulador cuántico.")
     
     elif opcion == "4":
-        # Ejecutar el circuito cuántico en un dispositivo cuántico real
         print("Ejecutando el circuito cuántico en un dispositivo cuántico real...")
-        # Aquí puedes ejecutar el circuito en un dispositivo cuántico real
         print("Circuito cuántico ejecutado exitosamente en un dispositivo cuántico real.")
     
     else:
         print("Opción no válida. Por favor, seleccione una opción válida.")
 
-def actualizar_vocabulario(vocabulario):
-    try:
-        with open('vocabulario.json', 'w') as vocab_file:
-            json.dump(vocabulario, vocab_file)
-        print("Archivo de vocabulario actualizado exitosamente.")
-    except Exception as e:
-        print(f"Error al actualizar el archivo de vocabulario: {e}")
-        
-def actualizar_data_entrenamiento(data_entrenamiento):
-    try:
-        with open('data_entrenamiento.json', 'w') as data_file:
-            json.dump(data_entrenamiento, data_file)
-        print("Archivo de data de entrenamiento actualizado exitosamente.")
-    except Exception as e:
-        print(f"Error al actualizar el archivo de data de entrenamiento: {e}")
+def crear_y_entrenar_modelo(vocabulario, data_entrenamiento):
+    modelo = Modelo(vocabulario)
+    modelo.entrenar_modelo(data_entrenamiento)
+    print("Modelo creado y entrenado exitosamente.")
 
-def procesar_instruccion(instruccion, vocabulario):
+def procesar_instruccion(instruccion, vocabulario, modelo):
     input_words = instruccion.split()
-    unique_input_words = list(set(input_words))  # Eliminar palabras duplicadas
-    input_indices = [vocabulario.get(word, -1) for word in unique_input_words]
+    unique_input_words = list(set(input_words))
+    input_indices = [vocabulario.vocabulario.get(word, -1) for word in unique_input_words]
     
     if -1 in input_indices:
         palabras_faltantes = [unique_input_words[i] for i in range(len(input_indices)) if input_indices[i] == -1]
         for palabra in palabras_faltantes:
-            if palabra not in vocabulario:
+            if palabra not in vocabulario.vocabulario:
                 while True:
                     opcion = input(f"La palabra '{palabra}' no está en el vocabulario. ¿Quieres buscar su significado en línea? (si/no): ")
                     if opcion.lower() == 'si':
                         significado = buscar_significado_palabra(palabra)
                         if significado:
                             print(f"Significado encontrado para '{palabra}': {significado}")
-                            vocabulario[palabra] = significado
+                            vocabulario.vocabulario[palabra] = significado
                             break
                         else:
                             print(f"No se encontró significado en línea para '{palabra}'.")
@@ -134,12 +155,21 @@ def procesar_instruccion(instruccion, vocabulario):
                         if significado.lower() == 'omitir':
                             break
                         else:
-                            vocabulario[palabra] = significado
+                            vocabulario.vocabulario[palabra] = significado
                             break
                     else:
                         print("Opción no válida. Por favor, ingresa 'si' o 'no'.")
 
     return vocabulario, input_indices
+
+def ejecutar_instruccion_lenguaje_natural(vocabulario, instruccion):
+    print("Ejecutando instrucción en lenguaje natural...")
+    # Aquí puedes usar el modelo para procesar la instrucción en lenguaje natural
+    # Por ahora, simplemente imprimimos las palabras de la instrucción y sus índices
+    palabras = instruccion.split()
+    for palabra in palabras:
+        indice = vocabulario.vocabulario.get(palabra, -1)
+        print(f"Palabra: {palabra}, Índice: {indice}")
 
 def interactuar_con_usuario(vocabulario, data_entrenamiento):
     while True:
@@ -150,32 +180,29 @@ def interactuar_con_usuario(vocabulario, data_entrenamiento):
         print("4. Eliminar palabra del vocabulario")
         print("5. Buscar palabra similar")
         print("6. Ejecutar circuito cuántico")
-        print("7. Salir")
+        print("7. Crear y entrenar modelo")
+        print("8. Salir")
         opcion = input("Seleccione una opción: ")
         
         if opcion == "1":
             instruccion = input("Ingrese una instrucción en lenguaje natural: ")
-            vocabulario, input_indices = procesar_instruccion(instruccion, vocabulario)
-            # Actualizar el archivo JSON del vocabulario
-            actualizar_vocabulario(vocabulario)
-            # Actualizar la data de entrenamiento
-            data_entrenamiento.append((instruccion, input_indices))
-            actualizar_data_entrenamiento(data_entrenamiento)
+            modelo = Modelo(vocabulario)
+            modelo.entrenar_modelo(data_entrenamiento)
+            vocabulario, input_indices = procesar_instruccion(instruccion, vocabulario, modelo)
+            ejecutar_instruccion_lenguaje_natural(vocabulario, instruccion)
         elif opcion == "2":
-            ver_vocabulario(vocabulario)
+            ver_vocabulario(vocabulario.vocabulario)
         elif opcion == "3":
             agregar_palabra_vocabulario(vocabulario)
-            # Actualizar el archivo JSON del vocabulario
-            actualizar_vocabulario(vocabulario)
         elif opcion == "4":
             eliminar_palabra_vocabulario(vocabulario)
-            # Actualizar el archivo JSON del vocabulario
-            actualizar_vocabulario(vocabulario)
         elif opcion == "5":
             buscar_palabra_similar(vocabulario)
         elif opcion == "6":
             ejecutar_circuito_cuántico(vocabulario, data_entrenamiento)
         elif opcion == "7":
+            crear_y_entrenar_modelo(vocabulario, data_entrenamiento)
+        elif opcion == "8":
             print("¡Hasta luego!")
             break
         else:
@@ -200,10 +227,11 @@ if not os.path.exists('data_entrenamiento.json'):
 # Cargar el vocabulario desde el archivo JSON
 try:
     with open('vocabulario.json', 'r') as vocab_file:
-        vocabulario = json.load(vocab_file)
+        data = json.load(vocab_file)
+        vocabulario = Vocabulario(data)
 except Exception as e:
     print(f"Error al cargar el archivo de vocabulario: {e}")
-    vocabulario = {}
+    vocabulario = Vocabulario({})
 
 # Cargar los datos de entrenamiento desde el archivo JSON
 try:
