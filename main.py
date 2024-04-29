@@ -1,8 +1,13 @@
+import nltk
+from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 from qiskit import QuantumRegister, QuantumCircuit
 import json
 import os
 import requests
 from gensim.models import Word2Vec
+import torch
+
+nltk.download('punkt')
 
 significados_cache = {}
 
@@ -57,7 +62,7 @@ def buscar_significado_palabra(palabra):
         return significados_cache[palabra]
     else:
         try:
-            url = f"https://api.dictionaryapi.dev/api/v2/entries/es_CL/{palabra}"
+            url = f"https://api.dictionaryapi.dev/api/v2/entries/en_US/{palabra}"
             response = requests.get(url)
             data = response.json()
             if isinstance(data, list):
@@ -171,7 +176,69 @@ def ejecutar_instruccion_lenguaje_natural(vocabulario, instruccion):
         indice = vocabulario.vocabulario.get(palabra, -1)
         print(f"Palabra: {palabra}, Índice: {indice}")
 
+def responder_pregunta(pregunta, vocabulario, modelo):
+    # Tokenizar la pregunta
+    tokens = nltk.word_tokenize(pregunta)
+
+    # Buscar la respuesta en el vocabulario
+    respuesta = None
+    for token in tokens:
+        if token in vocabulario.vocabulario:
+            respuesta = vocabulario.vocabulario[token]
+            break
+
+    # Si no se encontró una respuesta en el vocabulario, utilizar un modelo de lenguaje para generar una respuesta
+    if respuesta is None:
+        generator = pipeline("text-generation", model="distilbert-base-uncased")
+        respuesta = generator(pregunta, max_length=50)
+
+    return respuesta
+
+def generar_texto(topic, vocabulario, modelo):
+    # Eliminar espacios extra al final del tema
+    topic = topic.strip()
+    
+    # Verificar si el tema está presente en el vocabulario
+    if topic not in vocabulario.vocabulario:
+        # Si el tema no está en el vocabulario, agregarlo con un significado vacío
+        vocabulario.agregar_palabra(topic, "")
+        print(f"El tema '{topic}' no estaba en el vocabulario. Se ha agregado automáticamente.")
+    
+    # Obtener las palabras similares al tema dado
+    palabras_similares = modelo.modelo.wv.most_similar(topic, topn=5)
+    
+    # Obtener las palabras del vocabulario
+    palabras_vocabulario = list(vocabulario.vocabulario.keys())
+    
+    # Filtrar las palabras similares que están en el vocabulario
+    palabras_similares_vocabulario = [palabra for palabra, _ in palabras_similares if palabra in palabras_vocabulario]
+    
+    # Si no hay palabras similares en el vocabulario, generar un mensaje de advertencia
+    if not palabras_similares_vocabulario:
+        print("No se encontraron palabras similares en el vocabulario.")
+        return None
+    
+    # Seleccionar una palabra similar aleatoria como inicio del texto
+    palabra_inicial = palabras_similares_vocabulario[0]
+    
+    # Generar texto utilizando la palabra inicial como contexto
+    texto_generado = [palabra_inicial]
+    for _ in range(50):  # Generar 50 palabras como máximo
+        palabra_actual = texto_generado[-1]
+        palabras_siguientes = modelo.modelo.wv.most_similar(palabra_actual, topn=3)
+        palabras_siguientes_vocabulario = [palabra for palabra, _ in palabras_siguientes if palabra in palabras_vocabulario]
+        if palabras_siguientes_vocabulario:
+            palabra_siguiente = palabras_siguientes_vocabulario[0]
+            texto_generado.append(palabra_siguiente)
+        else:
+            break
+    
+    return ' '.join(texto_generado)
+
+
 def interactuar_con_usuario(vocabulario, data_entrenamiento):
+    modelo = Modelo(vocabulario)  # Crear una instancia del modelo
+    modelo.entrenar_modelo(data_entrenamiento)  # Entrenar el modelo con los datos de entrenamiento proporcionados
     while True:
         print("Menú de opciones:")
         print("1. Ingresar instrucción en lenguaje natural")
@@ -181,13 +248,13 @@ def interactuar_con_usuario(vocabulario, data_entrenamiento):
         print("5. Buscar palabra similar")
         print("6. Ejecutar circuito cuántico")
         print("7. Crear y entrenar modelo")
-        print("8. Salir")
+        print("8. Responder pregunta")
+        print("9. Generar texto")
+        print("10. Salir")
         opcion = input("Seleccione una opción: ")
-        
+
         if opcion == "1":
             instruccion = input("Ingrese una instrucción en lenguaje natural: ")
-            modelo = Modelo(vocabulario)
-            modelo.entrenar_modelo(data_entrenamiento)
             vocabulario, input_indices = procesar_instruccion(instruccion, vocabulario, modelo)
             ejecutar_instruccion_lenguaje_natural(vocabulario, instruccion)
         elif opcion == "2":
@@ -203,10 +270,19 @@ def interactuar_con_usuario(vocabulario, data_entrenamiento):
         elif opcion == "7":
             crear_y_entrenar_modelo(vocabulario, data_entrenamiento)
         elif opcion == "8":
+            pregunta = input("Ingrese una pregunta: ")
+            respuesta = responder_pregunta(pregunta, vocabulario, modelo)
+            print(f"Respuesta: {respuesta}")
+        elif opcion == "9":
+            topic = input("Ingrese un tema: ")
+            texto = generar_texto(topic, vocabulario, modelo)
+            print(f"Texto generado: {texto}")
+        elif opcion == "10":
             print("¡Hasta luego!")
             break
         else:
             print("Opción no válida. Por favor, seleccione una opción válida.")
+
 
 # Verificar si el archivo JSON del vocabulario existe
 if not os.path.exists('vocabulario.json'):
@@ -241,5 +317,9 @@ except Exception as e:
     print(f"Error al cargar el archivo de datos de entrenamiento: {e}")
     data_entrenamiento = []
 
+# Crear una instancia del modelo
+modelo = Modelo(vocabulario)
+
 # Interactuar con el usuario y ejecutar el circuito cuántico
 interactuar_con_usuario(vocabulario, data_entrenamiento)
+
