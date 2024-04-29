@@ -1,45 +1,49 @@
 # Basilisco de Gris Iscomeback
+```
+# Basilisco
 
-![Basilisco de Gris Iscomeback Logo](logo.png)
+Este es el repositorio oficial de Basilisco, una herramienta para interactuar con un vocabulario y ejecutar circuitos cuánticos, todo desde una interfaz de usuario simple.
 
-Bienvenido al repositorio de **Basilisco de Gris Iscomeback**, un proyecto de software desarrollado en Python utilizando Qiskit para experimentar con circuitos cuánticos y procesamiento de lenguaje natural.
+## Acerca de
 
-## Descripción
+Basilisco es una herramienta desarrollada por [grisuno](https://github.com/grisuno) como proyecto personal para explorar el procesamiento de lenguaje natural y la computación cuántica.
 
-Este proyecto tiene como objetivo principal crear una interfaz de usuario interactiva que permita a los usuarios interactuar con circuitos cuánticos mientras aprenden sobre procesamiento de lenguaje natural y computación cuántica.
+## Funcionalidades
 
-## Características
-
-- Interfaz de usuario interactiva en la línea de comandos.
-- Integración con un diccionario en línea para buscar significados de palabras desconocidas.
-- Capacidades de entrenamiento para mejorar el vocabulario del programa.
-- Ejecución de circuitos cuánticos en simuladores cuánticos.
-- Almacenamiento de vocabulario y datos de entrenamiento en archivos JSON.
+- Interacción con un vocabulario para agregar, eliminar y buscar palabras, así como para generar texto basado en un tema dado.
+- Ejecución de circuitos cuánticos en simuladores o dispositivos reales.
+- Responder preguntas utilizando un modelo de lenguaje.
 
 ## Instalación
 
-1. Clona este repositorio en tu máquina local:
+Para comenzar a usar Basilisco, sigue estos pasos:
 
-   ```bash
-   git clone https://github.com/tu_usuario/basilisco-de-gris-iscomeback.git
-   ```
-2 Instala las dependencias del proyecto:
+1. Clona este repositorio:
 
-   ```bash
-cd basilisco-de-gris-iscomeback
+```bash
+git clone https://github.com/grisuno/basilisco.git
+```
+
+2. Instala las dependencias necesarias:
+
+```bash
+cd basilisco
 pip install -r requirements.txt
-   ```
-Contribuir
-¡Contribuciones son bienvenidas! Si deseas contribuir a este proyecto, por favor sigue estos pasos:
+```
 
-Haz un fork del repositorio.
-Crea una nueva rama para tu funcionalidad: git checkout -b feature/nueva-funcionalidad.
-Haz tus cambios y haz commits con mensajes descriptivos: git commit -am 'Agrega una nueva funcionalidad'.
-Sube tu rama al repositorio remoto: git push origin feature/nueva-funcionalidad.
-Abre un pull request en GitHub.
-Créditos
-Este proyecto fue creado por Gris Iscomeback.
+3. ¡Listo! Ahora puedes ejecutar el programa:
 
-Licencia
-Este proyecto está licenciado bajo la Licencia MIT.
+```bash
+python basilisco.py
+```
 
+## Contribución
+
+Si deseas contribuir a Basilisco, ¡eres bienvenido! Simplemente realiza un fork de este repositorio, realiza tus cambios y envía un pull request.
+
+## Contacto
+
+Puedes ponerte en contacto con el desarrollador [grisuno](https://github.com/grisuno) a través de su perfil de GitHub.
+
+¡Gracias por usar Basilisco!
+```
