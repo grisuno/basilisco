@@ -6,4 +6,11 @@
 
 ## External Imports
 
-- `main.py` -> gensim.models, json, nltk, os, qiskit, requests, torch, transformers
+- `main.py` -> `gensim.models`
+- `main.py` -> `json`
+- `main.py` -> `nltk`
+- `main.py` -> `os`
+- `main.py` -> `qiskit`
+- `main.py` -> `requests`
+- `main.py` -> `torch`
+- `main.py` -> `transformers`

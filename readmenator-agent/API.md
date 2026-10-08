@@ -1,24 +1,66 @@
 # API
 
 ## main.py
-- `Vocabulario.__init__` (method) `main.py:15` `def __init__(self, data)`
-- `Vocabulario.cargar_vocabulario` (method) `main.py:18` `def cargar_vocabulario(self)`
-- `Vocabulario.agregar_palabra` (method) `main.py:26` `def agregar_palabra(self, palabra, significado)`
-- `Vocabulario.eliminar_palabra` (method) `main.py:30` `def eliminar_palabra(self, palabra)`
-- `Vocabulario.guardar_vocabulario` (method) `main.py:35` `def guardar_vocabulario(self)`
-- `Vocabulario.transformar_a_modelo` (method) `main.py:42` `def transformar_a_modelo(self)`
-- `Modelo.__init__` (method) `main.py:48` `def __init__(self, vocabulario)`
-- `Modelo.transformar_vocabulario_a_modelo` (method) `main.py:52` `def transformar_vocabulario_a_modelo(self)`
-- `Modelo.entrenar_modelo` (method) `main.py:56` `def entrenar_modelo(self, data_entrenamiento)`
-- `Modelo.buscar_significado_palabra` (method) `main.py:60` `def buscar_significado_palabra(palabra)`
-- `Modelo.ver_vocabulario` (method) `main.py:78` `def ver_vocabulario(vocabulario)`
-- `Modelo.agregar_palabra_vocabulario` (method) `main.py:83` `def agregar_palabra_vocabulario(vocabulario)`
-- `Modelo.eliminar_palabra_vocabulario` (method) `main.py:88` `def eliminar_palabra_vocabulario(vocabulario)`
-- `Modelo.buscar_palabra_similar` (method) `main.py:92` `def buscar_palabra_similar(vocabulario)`
-- `Modelo.ejecutar_circuito_cuántico` (method) `main.py:100` `def ejecutar_circuito_cuántico(vocabulario, data_entrenamiento)`
-- `Modelo.crear_y_entrenar_modelo` (method) `main.py:133` `def crear_y_entrenar_modelo(vocabulario, data_entrenamiento)`
-- `Modelo.procesar_instruccion` (method) `main.py:138` `def procesar_instruccion(instruccion, vocabulario, modelo)`
-- `Modelo.ejecutar_instruccion_lenguaje_natural` (method) `main.py:170` `def ejecutar_instruccion_lenguaje_natural(vocabulario, instruccion)`
-- `Modelo.responder_pregunta` (method) `main.py:179` `def responder_pregunta(pregunta, vocabulario, modelo)`
-- `Modelo.generar_texto` (method) `main.py:197` `def generar_texto(topic, vocabulario, modelo)`
-- `Modelo.interactuar_con_usuario` (method) `main.py:239` `def interactuar_con_usuario(vocabulario, data_entrenamiento)`
+
+### buscar_significado_palabra (method) `def buscar_significado_palabra(palabra)`
+- Defined: `main.py:60`
+
+### ver_vocabulario (method) `def ver_vocabulario(vocabulario)`
+- Defined: `main.py:78`
+
+### agregar_palabra_vocabulario (method) `def agregar_palabra_vocabulario(vocabulario)`
+- Defined: `main.py:83`
+
+### eliminar_palabra_vocabulario (method) `def eliminar_palabra_vocabulario(vocabulario)`
+- Defined: `main.py:88`
+
+### buscar_palabra_similar (method) `def buscar_palabra_similar(vocabulario)`
+- Defined: `main.py:92`
+
+### ejecutar_circuito_cuántico (method) `def ejecutar_circuito_cuántico(vocabulario, data_entrenamiento)`
+- Defined: `main.py:100`
+
+### crear_y_entrenar_modelo (method) `def crear_y_entrenar_modelo(vocabulario, data_entrenamiento)`
+- Defined: `main.py:133`
+
+### procesar_instruccion (method) `def procesar_instruccion(instruccion, vocabulario, modelo)`
+- Defined: `main.py:138`
+
+### ejecutar_instruccion_lenguaje_natural (method) `def ejecutar_instruccion_lenguaje_natural(vocabulario, instruccion)`
+- Defined: `main.py:170`
+
+### responder_pregunta (method) `def responder_pregunta(pregunta, vocabulario, modelo)`
+- Defined: `main.py:179`
+
+### generar_texto (method) `def generar_texto(topic, vocabulario, modelo)`
+- Defined: `main.py:197`
+
+### interactuar_con_usuario (method) `def interactuar_con_usuario(vocabulario, data_entrenamiento)`
+- Defined: `main.py:239`
+
+### __init__ (method) `def __init__(self, data)`
+- Defined: `main.py:15`
+
+### cargar_vocabulario (method) `def cargar_vocabulario(self)`
+- Defined: `main.py:18`
+
+### agregar_palabra (method) `def agregar_palabra(self, palabra, significado)`
+- Defined: `main.py:26`
+
+### eliminar_palabra (method) `def eliminar_palabra(self, palabra)`
+- Defined: `main.py:30`
+
+### guardar_vocabulario (method) `def guardar_vocabulario(self)`
+- Defined: `main.py:35`
+
+### transformar_a_modelo (method) `def transformar_a_modelo(self)`
+- Defined: `main.py:42`
+
+### __init__ (method) `def __init__(self, vocabulario)`
+- Defined: `main.py:48`
+
+### transformar_vocabulario_a_modelo (method) `def transformar_vocabulario_a_modelo(self)`
+- Defined: `main.py:52`
+
+### entrenar_modelo (method) `def entrenar_modelo(self, data_entrenamiento)`
+- Defined: `main.py:56`
